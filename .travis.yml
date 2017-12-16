@@ -1,6 +1,12 @@
 language: bash
-before_script:
-    - sudo apt purge --auto-remove sqlite3 -y
+#before_script:
+#   - sudo apt purge --auto-remove sqlite3 -y
 script:
     - bash Blog/blog.sh --help
     - bash Blog/blog.sh post add "Title" "Content"
+    - bash Blog/blog.sh post list
+    - bash Blog/blog.sh post search "t"
+    - bash Blog/blog.sh category add "songs"
+    - bash Blog/blog.sh category list
+    - bash Blog/blog.sh category assign 1 1
+    - bash Blog/blog.sh post add "November" "Masaki Kishibe" --category "Korean_songs"
