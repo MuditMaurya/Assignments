@@ -9,12 +9,14 @@ else
     #Uncomment when not automated
     #echo "Do you want to Install the Package (y/n)"
     #read choice
-    if [[$UID -ne 0]];
+    #Uncomment when manual
+    choice="y"
+    if [ $UID -ne 0 ]
     then
         echo "You are not root user to Install, Run this script from root user to install"
         exit 0
     else
-        if [$choice == "y"]
+        if [[ $choice == "y" ]]
         then
             if apt-get install sqlite3 -y | tee -a install_log.log ;
             then
