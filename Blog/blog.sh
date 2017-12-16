@@ -6,8 +6,9 @@ then
     echo "Package SQLite3 is Installed"
 else
     echo -e "Package SQLite3 is not Installed \n"
-    echo "Do you want to Install the Package (y/n)"
-    read choice
+    #Uncomment when not automated
+    #echo "Do you want to Install the Package (y/n)"
+    #read choice
     if [[$UID -ne 0]];
     then
         echo "You are not root user to Install, Run this script from root user to install"
