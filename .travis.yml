@@ -1,0 +1,4 @@
+language: bash
+script:
+    - bash blog.sh --help
+    - bash blog.sh post add "Title" "Content"
