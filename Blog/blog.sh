@@ -71,6 +71,9 @@ post)
             case $5 in
                 --category)
                     #category along with addition of the post
+                    #Checking if there is any category with same name
+                    COUNT=sqlite3 $dbname "SELECT SUM(*) FROM category WHERE category='$6'";
+                    #working here-------
                     ;;
                 * | "")
                     echo -e "Unknown option $5 / Empty Option \nTry --help | -h for more Information"
