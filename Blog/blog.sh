@@ -1,5 +1,4 @@
 #!/bin/bash
-#SELECT * FROM post INNER JOIN category ON post.id=category.cat_id;
 dpkg -s sqlite3 &> /dev/null
 if [ $? -eq 0 ];
 then
@@ -67,7 +66,7 @@ post)
     post_flag=1
     case $2 in
     add)
-        if [[ ! -z $5 ]] && [ ! -z $6 ]
+        if [[ ! -z $5 ]] && [[ ! -z $6 ]]
         then
             case $5 in
                 --category)
@@ -82,12 +81,17 @@ post)
             #Inserting Into Table blog(DB)>post(structure)
             echo "Adding POST"
             #if inserted successfully
-            if sqlite3 $dbname "INSERT INTO post(title , content) VALUES( '$3' , '$4')";
+            if [[ ! -z $3 ]] && [[ ! -z $4 ]]
             then
-                echo "Successfully added the post"
+                if sqlite3 $dbname "INSERT INTO post(title , content) VALUES( '$3' , '$4')";
+                then
+                    echo "Successfully added the post"
+                else
+                    echo "Something went wrong ! "
+                    exit 0
+                fi
             else
-                echo "Something went wrong ! "
-                exit 0
+                echo " Arguments are empty \n Try --help | -h for more Information"
             fi
         fi
         ;;
@@ -127,18 +131,22 @@ post)
         done
         ;;
     search)
-        #Search all the posts and 
-        echo "Searching for Keyword $3"
-        search_query=`sqlite3 $dbname "SELECT post_id,title,content FROM post WHERE content LIKE '%$3%' OR title LIKE '%$3%';"`;
-        for searches in $search_query;
-        do
-            echo $searches;
-        done
-        #Search=`sqlite3 $dbname`;
+        if [[ ! -z $3 ]]
+        then
+            #Search all the posts and 
+            echo "Searching for Keyword $3"
+            search_query=`sqlite3 $dbname "SELECT post_id,title,content FROM post WHERE content LIKE '%$3%' OR title LIKE '%$3%';"`;
+            for searches in $search_query;
+            do
+                echo $searches;
+            done
+        else
+            echo "Empty Arguments \n Try --help | -h for more information"
+            exit 0
+        fi
         ;;
     * | "")
         echo "Unknown Option: $2 / empty option  \nTry --help | -h for more information"
-        exit 0
     esac
     #post_function $2 $3 $4
     ;;
@@ -148,13 +156,18 @@ category)
     add)
         #Assuming that there is not category mentioned with same name
         #Adding a new category
-        echo "Add category : $3"
-        if sqlite3 $dbname "INSERT INTO category (category) VALUES ('$3');"
+        if [[ ! -z $3 ]]
         then
-            echo "Successfully Added the Category"
+            echo "Add category : $3"
+            if sqlite3 $dbname "INSERT INTO category (category) VALUES ('$3');"
+            then
+                echo "Successfully Added the Category"
+            else
+                echo "Something Went Wrong !"
+                exit 0
+            fi
         else
-            echo "Something Went Wrong !"
-            exit 0
+            echo "Empty Arguments \nTry --help | -h for more information"
         fi
         ;;
     list)
@@ -175,13 +188,18 @@ category)
         done
         ;;
     assign)
-        echo "Assigning $3 post to $4 category"
-        if sqlite3 $dbname "UPDATE post SET cat_id=$4 WHERE post_id=$3;";
+        if [[ ! -z $3 ]] && [[ ! -z $4 ]]
         then
-            echo "Assignment Task Successfully completed"
+            echo "Assigning $3 post to $4 category"
+            if sqlite3 $dbname "UPDATE post SET cat_id=$4 WHERE post_id=$3;";
+            then
+                echo "Assignment Task Successfully completed"
+            else
+                echo "Something Went Wrong !"
+                exit 0
+            fi
         else
-            echo "Something Went Wrong !"
-            exit 0
+            echo "Empty Arguments \nTry --help | -h for more information"
         fi
         ;;
     * | "")
