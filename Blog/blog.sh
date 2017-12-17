@@ -260,7 +260,9 @@ remove)
                     PRINT=`sqlite3 $dbname "SELECT post_id,title,content,cat_id FROM post WHERE post_id='$3'"`;
                     echo -e "POST : "$PRINT"\n"
                     echo -e "Are you Sure you want to delete this post ? (y/n)"
-                    read choice
+                    #Uncomment When Manually Testing
+                    #read choice
+                    choice='y'
                     if [ $choice == 'y' ]
                     then
                         if `sqlite3 $dbname "DELETE FROM post WHERE post_id='$3'"`;
@@ -294,7 +296,9 @@ remove)
                         PRINT=`sqlite3 $dbname "SELECT cat_id,category FROM category WHERE cat_id='$3'"`;
                         echo "Category : "$PRINT"\n"
                         echo -e "Are you Sure you want to delete this category ? (y/n)"
-                        read choice
+                        #Uncomment When Manually Testing
+                        #read choice
+                        choice='y'
                         if [ $choice == 'y' ]
                         then
                             if `sqlite3 $dbname "DELETE FROM category WHERE cat_id='$3'"`;
