@@ -51,15 +51,8 @@ category_flag=
 help(){
     echo "Help"
 }
-post_function(){
-    echo "Post Function"
-}
-category_function(){
-    echo "Category Function"
-}
 case $1 in
 -h|--help)
-    echo "HELP !!!"
     help
     ;;
 post)
@@ -89,10 +82,10 @@ post)
                         NEW=`expr $NEW + 1`;
                         if sqlite3 $dbname "INSERT INTO post(title,content,cat_id) VALUES('$3','$4','$NEW')";
                         then
-                            echo "Successfully added the Post\n"
+                            echo -e "Successfully added the Post\n"
                             if sqlite3 $dbname "INSERT INTO category(category) VALUES('$6')";
                             then
-                                echo "Successfully added the Category\n"
+                                echo -e "Successfully added the Category\n"
                             else
                                 echo "Something went wrong while adding Category";
                             fi
@@ -120,13 +113,13 @@ post)
                     exit 0
                 fi
             else
-                echo " Arguments are empty \n Try --help | -h for more Information"
+                echo -e "Arguments are empty \n Try --help | -h for more Information"
             fi
         fi
         ;;
     list)
         #blog.sh post list > will list all the posts in the DB
-        echo "\nListng all the Posts having assigned categories\n"
+        echo -e "\nListng all the Posts having assigned categories\n"
         #making query to list all the posts with assigned categories
         LIST=`sqlite3 $dbname 'SELECT post_id,title,content,post.cat_id,category.category FROM post INNER JOIN category ON post.cat_id=category.cat_id;'`;
         #for each of the posts
@@ -143,7 +136,7 @@ post)
             #Printing the posts and Contents
             #echo -e $post_id " --> " $post_title" --> "$post_content" --> "$post_category_id" --> "$post_category"\n"; 
         done
-        echo "\nListing post with Unassigned categories"
+        echo -e "\nListing post with Unassigned categories"
         #making query to list all the posts with unassigned category
         UNASSIGNED=`sqlite3 $dbname 'SELECT post_id,title,content,post.cat_id FROM post WHERE post.cat_id="Not assigned yet";'`;
         echo -e "\nPost ID --> Title --> Content --> Category ID \n"
@@ -170,12 +163,12 @@ post)
                 echo $searches;
             done
         else
-            echo "Empty Arguments \n Try --help | -h for more information"
+            echo -e "Empty Arguments \n Try --help | -h for more information"
             exit 0
         fi
         ;;
     * | "")
-        echo "Unknown Option: $2 / empty option  \nTry --help | -h for more information"
+        echo -e "Unknown Option: $2 / empty option  \nTry --help | -h for more information"
     esac
     #post_function $2 $3 $4
     ;;
@@ -203,7 +196,7 @@ category)
                 fi
             fi
         else
-            echo "Empty Arguments \nTry --help | -h for more information"
+            echo -e "Empty Arguments \nTry --help | -h for more information"
         fi
         ;;
     list)
@@ -247,14 +240,85 @@ category)
                 echo "Please Check Entered Post-ID";
             fi
         else
-            echo "Empty Arguments \nTry --help | -h for more information"
+            echo -e "Empty Arguments \nTry --help | -h for more information"
         fi
         ;;
     * | "")
-        echo "Unknown Option: $1 / empty option  \nTry --help | -h for more information"
+        echo -e "Unknown Option: $1 / empty option  \nTry --help | -h for more information"
         exit 0
     esac
     #category_function $2 $3 $4
+    ;;
+remove)
+    case $2 in
+        post)
+            if [[ ! -z $3 ]]
+            then
+                CHECK_POST_ID=`sqlite3 $dbname "SELECT post_id FROM post WHERE post_id='$3'"`;
+                if [ $CHECK_POST_ID > 0 ]
+                then
+                    PRINT=`sqlite3 $dbname "SELECT post_id,title,content,cat_id FROM post WHERE post_id='$3'"`;
+                    echo -e "POST : "$PRINT"\n"
+                    echo -e "Are you Sure you want to delete this post ? (y/n)"
+                    read choice
+                    if [ $choice == 'y' ]
+                    then
+                        if `sqlite3 $dbname "DELETE FROM post WHERE post_id='$3'"`;
+                        then
+                            echo "Deleted Successfully";
+                        else
+                            echo "Something went Wrong !"
+                        fi
+                    else
+                        echo "Wise Choice ;)";
+                    fi
+                else
+                    echo "No such Post ID !"
+                fi
+            else
+                echo "Post ID not mentioned";
+                echo "Try --help | -h for more information"
+            fi
+            ;;
+        category)
+            if [[ ! -z $3 ]]
+            then
+                CHECK_CAT_ID=`sqlite3 $dbname "SELECT cat_id FROM category WHERE cat_id='$3'"`;
+                if [ $CHECK_CAT_ID > 0 ]
+                then
+                    CHECK=`sqlite3 $dbname "SELECT SUM(cat_id) FROM post WHERE cat_id='$3'"`;
+                    if [ $CHECK > 0 ]
+                    then
+                        echo -e "You cannot delete this category because some posts have this category \nMake sure this category is not in use by any posts"
+                    else
+                        PRINT=`sqlite3 $dbname "SELECT cat_id,category FROM category WHERE cat_id='$3'"`;
+                        echo "Category : "$PRINT"\n"
+                        echo -e "Are you Sure you want to delete this category ? (y/n)"
+                        read choice
+                        if [ $choice == 'y' ]
+                        then
+                            if `sqlite3 $dbname "DELETE FROM category WHERE cat_id='$3'"`;
+                            then
+                                echo "Deleted Successfully";
+                            else
+                                echo "Something went Wrong !"
+                            fi
+                        else
+                            echo "Wise Choice ;)";
+                        fi
+                    fi
+                else
+                    echo "No such Category ID !"
+                fi
+            else
+                echo "Category ID not mentioned";
+            fi
+            ;;
+        * | "")
+            echo -e "Unknow option : '$2' /Empty Option \nTry --help | -h for more information"
+            exit 0
+            ;;
+    esac
     ;;
 * | "")
     echo -e "Unknown Option: $1 / empty option  \nTry --help | -h for more information"
