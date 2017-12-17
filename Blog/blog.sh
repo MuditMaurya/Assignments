@@ -72,8 +72,34 @@ post)
                 --category)
                     #category along with addition of the post
                     #Checking if there is any category with same name
-                    COUNT=sqlite3 $dbname "SELECT SUM(*) FROM category WHERE category='$6'";
-                    #working here-------
+                    COUNT=`sqlite3 $dbname "SELECT cat_id FROM category WHERE category='$6';"`;
+                    #Checking if Literally anything is returned which will mean that the category exists but also returns the id of the category
+                    if [ $COUNT > 0 ]
+                    then
+                        echo "Category already exists"
+                        if sqlite3 $dbname "INSERT INTO post(title,content,cat_id) VALUES('$3','$4','$COUNT')";
+                        then
+                            echo "New post added and Assigned to the given category"
+                        else
+                            echo "Something went wrong !"
+                        fi
+                    else
+                        echo "New Category Detected"
+                        NEW=`sqlite3 $dbname "SELECT COUNT(cat_id) FROM category;"`;
+                        NEW=`expr $NEW + 1`;
+                        if sqlite3 $dbname "INSERT INTO post(title,content,cat_id) VALUES('$3','$4','$NEW')";
+                        then
+                            echo "Successfully added the Post\n"
+                            if sqlite3 $dbname "INSERT INTO category(category) VALUES('$6')";
+                            then
+                                echo "Successfully added the Category\n"
+                            else
+                                echo "Something went wrong while adding Category";
+                            fi
+                        else
+                            echo "Something Went Wrong while adding Post"
+                        fi
+                    fi
                     ;;
                 * | "")
                     echo -e "Unknown option $5 / Empty Option \nTry --help | -h for more Information"
@@ -161,13 +187,20 @@ category)
         #Adding a new category
         if [[ ! -z $3 ]]
         then
-            echo "Add category : $3"
-            if sqlite3 $dbname "INSERT INTO category (category) VALUES ('$3');"
+            COUNT=`sqlite3 $dbname "SELECT cat_id FROM category WHERE category='$3';"`;
+	        #Checking if Literally anything is returned which will mean that the category exists but also returns the id of the category
+	        if [ $COUNT > 0 ]
             then
-                echo "Successfully Added the Category"
+                echo "Category already exists"
             else
-                echo "Something Went Wrong !"
-                exit 0
+                echo "Add category : $3"
+                if sqlite3 $dbname "INSERT INTO category (category) VALUES ('$3');"
+                then
+                    echo "Successfully Added the Category"
+                else
+                    echo "Something Went Wrong !"
+                    exit 0
+                fi
             fi
         else
             echo "Empty Arguments \nTry --help | -h for more information"
@@ -194,12 +227,24 @@ category)
         if [[ ! -z $3 ]] && [[ ! -z $4 ]]
         then
             echo "Assigning $3 post to $4 category"
-            if sqlite3 $dbname "UPDATE post SET cat_id=$4 WHERE post_id=$3;";
+            CHECK_POST_ID=`sqlite3 $dbname "SELECT post_id FROM post WHERE post_id='$3'"`;
+            CHECK_CAT_ID=`sqlite3 $dbname "SELECT cat_id FROM category WHERE cat_id='$4'"`;
+            if [ $CHECK_POST_ID > 0 ]
             then
-                echo "Assignment Task Successfully completed"
+                if [ $CHECK_CAT_ID > 0 ]
+                then
+                    if sqlite3 $dbname "UPDATE post SET cat_id=$4 WHERE post_id=$3;";
+                    then
+                        echo "Assignment Task Successfully completed"
+                    else
+                        echo "Something Went Wrong !"
+                        exit 0
+                    fi
+                else
+                    echo "Please Check Entered Category-ID";
+                fi
             else
-                echo "Something Went Wrong !"
-                exit 0
+                echo "Please Check Entered Post-ID";
             fi
         else
             echo "Empty Arguments \nTry --help | -h for more information"
