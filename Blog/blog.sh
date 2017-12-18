@@ -1,5 +1,7 @@
 #!/bin/bash
 #Checking if sqlite3 is installed
+bold=$(tput bold)
+normal=$(tput sgr0)
 dpkg -s sqlite3 &> /dev/null
 if [ $? -eq 0 ];
 then
@@ -49,7 +51,20 @@ sqlite3 $dbname < /tmp/tmpblog_table
 sqlite3 $dbname < /tmp/tmpcategory_table
 #Help function
 help(){
-    echo "Help"
+    echo "${bold}Help${normal}"
+    echo -e "Usage : bash blog.sh [OPTIONS].....\n"
+    echo -e "${bold}Description${normal}\n"
+    echo -e "Small command-line blogging application which uses Sqlite3 for datebase. It performs the operation of adding,updating,listing and removing a post and adding,listing and removing a Category.\n"
+    echo -e "${bold}Arguments${normal}\n"
+    echo -e "post\t\tFor adding/listing/searching a post in the blog.\ncategory\tFor adding/listing/assigning a category.\nremove\t\tFor Removing/Deleting a post/category from the blog.\n--help,-h\tFor Listing this help.\n"
+    echo "${bold}Examples${normal}"
+    echo -e "\nbash blog.sh --help[-h]\n\t Above will print this Help.\n"
+    echo -e "bash blog.sh post add "title" "content"\n\t Above will add a new blog post with the title and content given.\n"
+    echo -e "bash blog.sh post list\n\t Will List all the Blog Posts.\n"
+    echo -e "bash blog.sh post search "keywords"\n\t Will list all the blog posts where "Keyword" is found in title/content.\n"
+    echo -e "bash blog.sh category add "category-name"\n\t This command will add a New Category if not already present.\n"
+    echo -e "bash blog.sh category list\n\t Will list all the categories.\n"
+    echo -e "bash blog.sh category assign <post_id> <cat_id>\n\t Will first check for the posts and categories existance if returned true will assign category to the post given by <post_id> and <category_id>.\n"
 }
 #Checking what was the first argument
 case $1 in
