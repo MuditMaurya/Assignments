@@ -60,12 +60,15 @@ help(){
     echo -e "post\t\tFor adding/listing/searching a post in the blog.\ncategory\tFor adding/listing/assigning a category.\nremove\t\tFor Removing/Deleting a post/category from the blog.\n--help,-h\tFor Listing this help.\n"
     echo "${bold}Examples${normal}"
     echo -e "\nbash blog.sh --help[-h]\n\t Above will print this Help.\n"
-    echo -e "bash blog.sh post add "title" "content"\n\t Above will add a new blog post with the title and content given.\n"
+    echo -e "bash blog.sh post add 'title' 'content'\n\t Above will add a new blog post with the title and content given.\n"
     echo -e "bash blog.sh post list\n\t Will List all the Blog Posts.\n"
-    echo -e "bash blog.sh post search "keywords"\n\t Will list all the blog posts where "Keyword" is found in title/content.\n"
-    echo -e "bash blog.sh category add "category-name"\n\t This command will add a New Category if not already present.\n"
+    echo -e "bash blog.sh post search 'keywords'\n\t Will list all the blog posts where "Keyword" is found in title/content.\n"
+    echo -e "bash blog.sh category add 'category-name'\n\t This command will add a New Category if not already present.\n"
     echo -e "bash blog.sh category list\n\t Will list all the categories.\n"
     echo -e "bash blog.sh category assign <post_id> <cat_id>\n\t Will first check for the posts and categories existance if returned true will assign category to the post given by <post_id> and <category_id>.\n"
+    echo -e "bash blog.sh post add 'title' 'content' --category 'cat_name'\n\t This will first check if the category is present or not if present will add the post and assign the category and if not present will add the post and category.\n"
+    echo -e "bash blog.sh remove post <post_id>\n\t This will first check if the post is present, if true will delete the post.\n"
+    echo -e "bash blog.sh remove category <cat_id>\n\t Will first check if there is such category with this id, if yes then will check if the category is assigned to some post if no , will delete the category.\n"
 }
 #Checking what was the first argument
 case $1 in
