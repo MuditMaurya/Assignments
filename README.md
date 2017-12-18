@@ -10,7 +10,7 @@ Small command-line blogging application which uses Sqlite3 for datebase. It perf
 ```bash
 bash blog.sh [OPTIONS]...
 ```
-###Examples
+### Examples
 
 This will print Help.
 
