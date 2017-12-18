@@ -1,4 +1,5 @@
 #!/bin/bash
+#Checking if sqlite3 is installed
 dpkg -s sqlite3 &> /dev/null
 if [ $? -eq 0 ];
 then
@@ -10,6 +11,7 @@ else
     #read choice
     #Uncomment when manual
     choice="y"
+    #Are you a root user
     if [ $UID -ne 0 ]
     then
         echo "You are not root user to Install, Run this script from root user to install"
@@ -17,6 +19,7 @@ else
     else
         if [[ $choice == "y" ]]
         then
+            #installing sqlite3 if not installed
             if apt-get install sqlite3 -y | tee -a install_log.log ;
             then
                 echo "Successfully installed sqlite3"
@@ -36,29 +39,31 @@ else
     echo "DB present"
 fi
 #Creating structure of the Table "blog" if not Exists then Create.
-blog_table='CREATE TABLE IF NOT EXISTS post (post_id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,content TEXT,cat_id INTEGER DEFAULT "Not assigned yet");'
+blog_table='CREATE TABLE IF NOT EXISTS post (post_id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,content TEXT,cat_id INTEGER DEFAULT "Not_assigned_yet");'
 echo $blog_table > /tmp/tmpblog_table
 #Creating Structure of table Table "category" if not exist then Create.
 category_table='CREATE TABLE IF NOT EXISTS category (cat_id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT , FOREIGN KEY(cat_id) REFERENCES post(post_id));'
 echo $category_table > /tmp/tmpcategory_table
+#Finally Creating table in database
 sqlite3 $dbname < /tmp/tmpblog_table
 sqlite3 $dbname < /tmp/tmpcategory_table
-add_flag=
-post_flag=
-list_flag=
-search_flag=
-category_flag=
+#Help function
 help(){
     echo "Help"
 }
+#Checking what was the first argument
 case $1 in
 -h|--help)
+    #calling Help function
     help
     ;;
+#If first argument is "Post"
 post)
-    post_flag=1
     case $2 in
+    #Whether adding/listing/searching a post
     add)
+    #If categories is also passed during adding of post
+    #Cheking id arguments are not empty
         if [[ ! -z $5 ]] && [[ ! -z $6 ]]
         then
             case $5 in
@@ -70,6 +75,7 @@ post)
                     if [ $COUNT > 0 ]
                     then
                         echo "Category already exists"
+                        #If category exists, add a new post and refer the category
                         if sqlite3 $dbname "INSERT INTO post(title,content,cat_id) VALUES('$3','$4','$COUNT')";
                         then
                             echo "New post added and Assigned to the given category"
@@ -77,12 +83,15 @@ post)
                             echo "Something went wrong !"
                         fi
                     else
+                        #or else add a new category
                         echo "New Category Detected"
                         NEW=`sqlite3 $dbname "SELECT COUNT(cat_id) FROM category;"`;
                         NEW=`expr $NEW + 1`;
+                        #adding a post along with the category
                         if sqlite3 $dbname "INSERT INTO post(title,content,cat_id) VALUES('$3','$4','$NEW')";
                         then
                             echo -e "Successfully added the Post\n"
+                            #adding the category
                             if sqlite3 $dbname "INSERT INTO category(category) VALUES('$6')";
                             then
                                 echo -e "Successfully added the Category\n"
@@ -94,6 +103,7 @@ post)
                         fi
                     fi
                     ;;
+                    #if none of the arguments matched
                 * | "")
                     echo -e "Unknown option $5 / Empty Option \nTry --help | -h for more Information"
                     exit 0
@@ -102,9 +112,10 @@ post)
         else
             #Inserting Into Table blog(DB)>post(structure)
             echo "Adding POST"
-            #if inserted successfully
+            #Checking for empty arguments
             if [[ ! -z $3 ]] && [[ ! -z $4 ]]
             then
+                #adding the post
                 if sqlite3 $dbname "INSERT INTO post(title , content) VALUES( '$3' , '$4')";
                 then
                     echo "Successfully added the post"
@@ -126,15 +137,8 @@ post)
         echo -e "Post ID --> Title --> Content --> Category ID --> Category \n"
         for posts in $LIST;
         do
-            echo $posts
-            #Since sqlite3 returns a pipe saparated string
-            #post_id=`echo $posts | awk '{split($0,post,"|"); print post[1]}'`
-            #post_title=`echo $posts | awk '{split($0,post,"|");print post[2]}'`
-            #post_content=`echo $posts | awk '{split($0,post,"|");print post[3]}'`
-            #post_category_id=`echo $posts | awk '{split($0,post,"|");print post[4]}'`
-            #post_category=`echo $posts | awk '{split($0,post,"|");print post[5]}'`
-            #Printing the posts and Contents
-            #echo -e $post_id " --> " $post_title" --> "$post_content" --> "$post_category_id" --> "$post_category"\n"; 
+            #Printing all the Assigned posts
+            echo $posts 
         done
         echo -e "\nListing post with Unassigned categories"
         #making query to list all the posts with unassigned category
@@ -142,17 +146,13 @@ post)
         echo -e "\nPost ID --> Title --> Content --> Category ID \n"
         for uposts in $UNASSIGNED;
         do
+            #Printing all the Unassigned posts
             echo $uposts;
-            #Since sqlite3 returns a pipe saparated string
-            #upost_id=`echo $uposts | awk '{split($0,upost,"|"); print upost[1]}'`
-            #upost_title=`echo $uposts | awk '{split($0,upost,"|");print upost[2]}'`
-            #upost_content=`echo $uposts | awk '{split($0,upost,"|");print upost[3]}'`
-            #upost_category_id=`echo $uposts | awk '{split($0,upost,"|");print upost[4]}'`
-            #Printing the posts and Contents
-            #echo -e $upost_id " --> " $upost_title" --> "$upost_content" --> "$upost_category_id"\n"; 
         done
         ;;
     search)
+        #Search Operation
+        #Checking if the argument is not empty
         if [[ ! -z $3 ]]
         then
             #Search all the posts and 
@@ -160,6 +160,7 @@ post)
             search_query=`sqlite3 $dbname "SELECT post_id,title,content FROM post WHERE content LIKE '%$3%' OR title LIKE '%$3%';"`;
             for searches in $search_query;
             do
+                #Printing the Search Result
                 echo $searches;
             done
         else
@@ -170,13 +171,11 @@ post)
     * | "")
         echo -e "Unknown Option: $2 / empty option  \nTry --help | -h for more information"
     esac
-    #post_function $2 $3 $4
     ;;
 category)
-    category_flag=1
+    # If performing operations on Category
     case $2 in
     add)
-        #Assuming that there is not category mentioned with same name
         #Adding a new category
         if [[ ! -z $3 ]]
         then
@@ -186,6 +185,7 @@ category)
             then
                 echo "Category already exists"
             else
+                #If its a new category not in database yet
                 echo "Add category : $3"
                 if sqlite3 $dbname "INSERT INTO category (category) VALUES ('$3');"
                 then
@@ -217,15 +217,19 @@ category)
         done
         ;;
     assign)
+        #Assigning operation post to its category
+        #Checking for empty arguments
         if [[ ! -z $3 ]] && [[ ! -z $4 ]]
         then
             echo "Assigning $3 post to $4 category"
+            #Checking if both of the arguments (Post ID and Category ID )does exist or not
             CHECK_POST_ID=`sqlite3 $dbname "SELECT post_id FROM post WHERE post_id='$3'"`;
             CHECK_CAT_ID=`sqlite3 $dbname "SELECT cat_id FROM category WHERE cat_id='$4'"`;
             if [ $CHECK_POST_ID > 0 ]
             then
                 if [ $CHECK_CAT_ID > 0 ]
                 then
+                    #If exist then update them
                     if sqlite3 $dbname "UPDATE post SET cat_id=$4 WHERE post_id=$3;";
                     then
                         echo "Assignment Task Successfully completed"
@@ -247,24 +251,30 @@ category)
         echo -e "Unknown Option: $1 / empty option  \nTry --help | -h for more information"
         exit 0
     esac
-    #category_function $2 $3 $4
     ;;
 remove)
+    #Removing or Deleting a post/Category
     case $2 in
+        #Deleting a post
         post)
+            #Checking for empty argument
             if [[ ! -z $3 ]]
             then
+                #Checking if the requested to delete post exists or not
                 CHECK_POST_ID=`sqlite3 $dbname "SELECT post_id FROM post WHERE post_id='$3'"`;
                 if [ $CHECK_POST_ID > 0 ]
                 then
+                    #Printing all the Post to be deleted
                     PRINT=`sqlite3 $dbname "SELECT post_id,title,content,cat_id FROM post WHERE post_id='$3'"`;
                     echo -e "POST : "$PRINT"\n"
                     echo -e "Are you Sure you want to delete this post ? (y/n)"
                     #Uncomment When Manually Testing
                     #read choice
+                    #Comment when Manually Testing
                     choice='y'
                     if [ $choice == 'y' ]
                     then
+                        #If user really wants to delete then Deleted
                         if `sqlite3 $dbname "DELETE FROM post WHERE post_id='$3'"`;
                         then
                             echo "Deleted Successfully";
@@ -283,16 +293,21 @@ remove)
             fi
             ;;
         category)
+            #Deleting a Category
+            #Checking for empty argument
             if [[ ! -z $3 ]]
             then
+                #Checking if requested category to be deleted exists or not
                 CHECK_CAT_ID=`sqlite3 $dbname "SELECT cat_id FROM category WHERE cat_id='$3'"`;
                 if [ $CHECK_CAT_ID > 0 ]
                 then
+                    #Cannot delete the Category if it is in use by some post
                     CHECK=`sqlite3 $dbname "SELECT SUM(cat_id) FROM post WHERE cat_id='$3'"`;
                     if [ $CHECK > 0 ]
                     then
                         echo -e "You cannot delete this category because some posts have this category \nMake sure this category is not in use by any posts"
                     else
+                        #Printing the category
                         PRINT=`sqlite3 $dbname "SELECT cat_id,category FROM category WHERE cat_id='$3'"`;
                         echo "Category : "$PRINT"\n"
                         echo -e "Are you Sure you want to delete this category ? (y/n)"
@@ -301,6 +316,7 @@ remove)
                         choice='y'
                         if [ $choice == 'y' ]
                         then
+                            #If user really want to delete this category
                             if `sqlite3 $dbname "DELETE FROM category WHERE cat_id='$3'"`;
                             then
                                 echo "Deleted Successfully";
@@ -324,6 +340,7 @@ remove)
             ;;
     esac
     ;;
+    #Invalid option or Empty option
 * | "")
     echo -e "Unknown Option: $1 / empty option  \nTry --help | -h for more information"
     exit 0
