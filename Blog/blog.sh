@@ -1,5 +1,6 @@
 #!/bin/bash
 #Checking if sqlite3 is installed
+#Script for Travis-ci , Uncomment at various locations told for manual testing
 bold=$(tput bold)
 normal=$(tput sgr0)
 dpkg -s sqlite3 &> /dev/null
@@ -223,12 +224,8 @@ category)
         echo -e "Category ID-->Name \n"
         for cats in $CAT_LIST;
         do
+            #Printing categories along with there IDs
             echo $cats
-            #Since sqlite3 returns a pipe seperated string
-            #cat_id=`echo $cats | awk '{split($0,cat,"|"); print cat[1]}'`
-            #cat_name=`echo $cats | awk '{split($0,cat,"|");print cat[2]}'`
-            #Printing the posts and Contents
-            #echo -e $cat_id "-->" $cat_name"\n"; 
         done
         ;;
     assign)
@@ -361,11 +358,3 @@ remove)
     exit 0
     ;;
 esac
-#TO-DO
-# post add title content --category cat_name
-#if parameters are empty check
-#Comments to be made properly
-#make readme.md file
-#check returned value from DB and print null in place of them
-#search and list function not working properly need work there
-#cleaning
