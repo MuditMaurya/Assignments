@@ -315,6 +315,7 @@ remove)
                     if [ $CHECK > 0 ]
                     then
                         echo -e "You cannot delete this category because some posts have this category \nMake sure this category is not in use by any posts"
+                        exit 0
                     else
                         #Printing the category
                         PRINT=`sqlite3 $dbname "SELECT cat_id,category FROM category WHERE cat_id='$3'"`;
