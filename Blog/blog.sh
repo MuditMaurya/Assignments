@@ -9,11 +9,8 @@ then
     echo "Package SQLite3 is Installed"
 else
     echo -e "Package SQLite3 is not Installed \n"
-    #Uncomment when not automated
-    #echo "Do you want to Install the Package (y/n)"
-    #read choice
-    #Uncomment when manual
-    choice="y"
+    echo "Do you want to Install the Package (y/n)"
+    read choice
     #Are you a root user
     if [ $UID -ne 0 ]
     then
@@ -283,10 +280,7 @@ remove)
                     PRINT=`sqlite3 $dbname "SELECT post_id,title,content,cat_id FROM post WHERE post_id='$3'"`;
                     echo -e "POST : "$PRINT"\n"
                     echo -e "Are you Sure you want to delete this post ? (y/n)"
-                    #Uncomment When Manually Testing
-                    #read choice
-                    #Comment when Manually Testing
-                    choice='y'
+                    read choice
                     if [ $choice == 'y' ]
                     then
                         #If user really wants to delete then Deleted
@@ -326,9 +320,7 @@ remove)
                         PRINT=`sqlite3 $dbname "SELECT cat_id,category FROM category WHERE cat_id='$3'"`;
                         echo "Category : "$PRINT"\n"
                         echo -e "Are you Sure you want to delete this category ? (y/n)"
-                        #Uncomment When Manually Testing
-                        #read choice
-                        choice='y'
+                        read choice
                         if [ $choice == 'y' ]
                         then
                             #If user really want to delete this category

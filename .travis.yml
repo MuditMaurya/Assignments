@@ -9,6 +9,6 @@ script:
     - bash Blog/blog.sh category add "songs"
     - bash Blog/blog.sh category list
     - bash Blog/blog.sh category assign 1 1
-    - bash Blog/blog.sh post add "November" "Masaki Kishibe" --category "Korean_songs"
-    - bash Blog/blog.sh remove category 1 -y
-    - bash Blog/blog.sh remove post 1 -y
+    - bash Blog/blog.sh post add "November" "By : Masaki Kishibe" --category "Korean_songs"
+    - bash Blog/blog.sh remove category 1 < input.txt
+    - bash Blog/blog.sh remove post 1 < input.txt
