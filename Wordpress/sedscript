@@ -5,4 +5,5 @@ s/#location ~/location ~/
 s/#\tinclude snippets/\tinclude snippets/
 s/#\tfastcgi_pass unix:/\tfastcgi_pass unix:/
 s/php7.0-fpm.sock/php7.1-fpm.sock/
+s/#\tdeny all/\tdeny all/
 s/\t#}/\t}/
