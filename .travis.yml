@@ -1,6 +1,6 @@
 language: bash
-#before_script:
-#   - sudo apt purge --auto-remove sqlite3 -y
+before_script:
+   - sudo apt purge --auto-remove sqlite3 -y
 script:
     - bash Blog/blog.sh --help
     - bash Blog/blog.sh post add "Title" "Content"
