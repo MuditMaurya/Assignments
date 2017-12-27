@@ -153,10 +153,11 @@ post)
         ;;
     list)
         #blog.sh post list > will list all the posts in the DB
-        list_check=`sqlite3 $dbname 'SELECT SUM(cat_id) FROM post ;'`;
-        if [[ ! -z "$list_check" ]];
+        list_check=`sqlite3 $dbname 'SELECT post_id FROM post WHERE cat_id!="Not_assigned_yet";'`;
+        if [ ! -z "$list_check" ];
         then
-            echo -e "\nListng all the Posts having assigned categories\n"
+            echo -e "- - - - - - - - - - - - - - - - -\n"
+            echo -e "Listing all the Posts having assigned categories:\n"
             #making query to list all the posts with assigned categories
             LIST=`sqlite3 $dbname 'SELECT post_id,title,content,post.cat_id,category.category FROM post INNER JOIN category ON post.cat_id=category.cat_id;'`;
             #for each of the posts
@@ -166,14 +167,17 @@ post)
                 #Printing all the Assigned posts
                 echo $posts 
             done
+            echo -e "- - - - - - - - - - - - - - - - -\n"
         else
+            echo -e "- - - - - - - - -\n"
             echo "Assigned Posts"
             echo "<----No Data to Show---->"
         fi
         list_check=`sqlite3 $dbname 'SELECT SUM(post_id) FROM post WHERE post.cat_id="Not_assigned_yet";'`;
         if [[ ! -z "$list_check" ]];
         then
-            echo -e "\nListing post with Unassigned categories"
+            echo -e "- - - - - - - - - - - - - - - - -\n"
+            echo -e "Listing post with Unassigned categories"
             #making query to list all the posts with unassigned category
             UNASSIGNED=`sqlite3 $dbname 'SELECT post_id,title,content,post.cat_id FROM post WHERE post.cat_id="Not_assigned_yet";'`;
             echo -e "\nPost ID --> Title --> Content --> Category ID \n"
@@ -182,7 +186,9 @@ post)
                 #Printing all the Unassigned posts
                 echo $uposts;
             done
+            echo -e "- - - - - - - - - - - - - - - - -\n"
         else
+            echo -e "- - - - - - - - -\n"
             echo "Unassigned Posts"
             echo "<----No Data to Show---->"
         fi
