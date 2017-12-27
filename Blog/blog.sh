@@ -99,7 +99,7 @@ post)
                     then
                         echo "Category already exists"
                         #If category exists, add a new post and refer the category
-                        if sqlite3 $dbname 'INSERT INTO post(title,content,cat_id) VALUES("'$3'","'$4'",$COUNT)';
+                        if sqlite3 $dbname 'INSERT INTO post(title,content,cat_id) VALUES("'$3'","'$4'",'$COUNT')';
                         then
                             echo "New post added and Assigned to the given category"
                         else
