@@ -15,6 +15,8 @@ configure(){
     else
         echo "Default Config File not Present"
     fi
+    echo "Starting Mysql Server"
+    service mysql start
     echo "Wait 10sec"
     sleep 10
     cp /etc/nginx/sites-available/default $PWD/.default_temp
@@ -60,12 +62,12 @@ configure(){
     echo "Hold on !! Almost Done\n"
     cp /tmp/wordpress/wp-config-sample.php /tmp/wordpress/wp-config.php
     mkdir /tmp/wordpress/wp-content/upgrade
-    sudo cp -a /tmp/wordpress/. /var/www/example.com/html/
-    sudo chown -R $USER:www-data /var/www/example.com/html
-    sudo find /var/www/example.com/html -type d -exec chmod g+s {}
-    sudo chmod g+w /var/www/example.com/html/wp-content
-    sudo chmod -R g+w /var/www/example.com/html/wp-content/themes
-    sudo chmod -R g+w /var/www/example.com/html/wp-content/plugins
+    cp -a /tmp/wordpress/. /var/www/example.com/html/
+    chown -R $USER:www-data /var/www/example.com/html
+    find /var/www/example.com/html -type d -exec chmod g+s {} \;
+    chmod g+w /var/www/example.com/html/wp-content
+    chmod -R g+w /var/www/example.com/html/wp-content/themes
+    chmod -R g+w /var/www/example.com/html/wp-content/plugins
     echo "Setting Up SALT"
     cd /var/www/example.com/html/
     wget https://api.wordpress.org/secret-key/1.1/salt/ -O salt.txt
@@ -73,8 +75,8 @@ configure(){
     sed -i 's/database_name_here/'$dbname'/' wp-config.php
     sed -i 's/username_here/wordpress/' wp-config.php
     sed -i 's/password_here/'$wordpress_password'/' wp-config.php
-    service php7.0-fpm reload
-    service php7.0-fpm restart
+    service php7.1-fpm reload
+    service php7.1-fpm restart
     service nginx reload
     service nginx restart
     nginx -t
@@ -98,7 +100,7 @@ do
 done
 read -p "\nEnter your Domain Name : " domain_name
 echo "---------------CHECKING--------------";
-array_name=( nginx php7.0-fpm php7.0-mysql mysql-server mysql-client php-curl php-gd php-mbstring php-mcrypt php-xml php-xmlrpc);
+array_name=( nginx php7.1-fpm php7.1-mysql mysql-server mysql-client php-curl php-gd php-mbstring php-mcrypt php-xml php-xmlrpc);
 uninstalled=()
 counter=0
 for i in "${array_name[@]}";
