@@ -100,7 +100,7 @@ do
 done
 read -p "\nEnter your Domain Name : " domain_name
 echo "---------------CHECKING--------------";
-array_name=( nginx php7.1-fpm php7.1-mysql mysql-server mysql-client php-curl php-gd php-mbstring php-mcrypt php-xml php-xmlrpc);
+array_name=(wget curl nginx php7.1-fpm php7.1-mysql mysql-server mysql-client php-curl php-gd php-mbstring php-mcrypt php-xml php-xmlrpc);
 uninstalled=()
 counter=0
 for i in "${array_name[@]}";
