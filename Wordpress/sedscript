@@ -4,6 +4,6 @@ s/index index.html/index index.php index.html/
 s/#location ~/location ~/
 s/#\tinclude snippets/\tinclude snippets/
 s/#\tfastcgi_pass unix:/\tfastcgi_pass unix:/
-s/php7.0-fpm.sock/php7.1-fpm.sock/
 s/#\tdeny all/\tdeny all/
+s/#try_files $uri $uri\/ =404;/try_files $uri $uri\/ \/index.php$is_args$args;/
 s/\t#}/\t}/
