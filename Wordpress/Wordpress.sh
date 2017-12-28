@@ -170,7 +170,7 @@ then
                     echo -e "${RED}Error during installation of $i.${NC}"
                 fi
             done
-            configure $domain_name
+            configure $domain_name | tee -a configure.log
         fi
     else
         echo "Manual Install and Manual Configure/or Run Script for Configuration after all the LEMP installation"
@@ -178,7 +178,7 @@ then
 else
     echo "No packages to install\n"
     echo "Configuring the Sever"
-    configure $domain_name
+    configure $domain_name | tee -a configure.log
 fi
 #TO-DO
 #Check for db_password auto set correction
