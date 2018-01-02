@@ -1,4 +1,6 @@
 #!/bin/bash
+LOG=wordpress.log
+ERROR=wordpress.err
 #Function to restart php-fpm
 php_restart(){
     service php7.1-fpm start
@@ -7,6 +9,7 @@ php_restart(){
 }
 #Configuration Function
 configure(){
+    echo -e "\n Starting Configuring \n"
     domain=$1
     #Domain Config for nginx
     domain_conf="$domain".conf
@@ -16,9 +19,9 @@ configure(){
     echo "Starting Mysql Server"
     service mysql start
     #Copying Default nginx config file to a temp file
-    cp /etc/nginx/sites-available/default $PWD/.default_temp
+    cp /etc/nginx/sites-available/default $PWD/default.backup
     echo "Configuration Operations"
-    sed -f sedscript .default_temp > default
+    sed -f sedscript default.backup > $PWD/default
     mv $PWD/default /etc/nginx/sites-available/default
     php_restart
     service nginx restart
@@ -31,14 +34,13 @@ configure(){
         #Making an entry in /etc/hosts for Example.com
         echo '127.0.0.1 '"$domain www.$domain" >> /etc/hosts
     fi
-    #Editing Default for Example.com configuration same as did in Default Config file
-    cp /etc/nginx/sites-available/default $PWD/.example_temp.com
-    sed -i 's/\/var\/www\/html/\/var\/www\/'$domain'\/html/' .example_temp.com
-    sed -i 's/server_name _/server_name '$domain_name' www.'$domain_name'/' .example_temp.com
-    sed -i 's/ default_server//' $PWD/.example_temp.com
-    cat $PWD/.example_temp.com > $PWD/$domain_conf
+    #Editing Default for Example.com configuration same as did in Default Config file 
+    sed -i 's/\/var\/www\/html/\/var\/www\/'$domain'\/html/' /etc/nginx/sites-available/default
+    sed -i 's/server_name _/server_name '$domain_name' www.'$domain_name'/' /etc/nginx/sites-available/default
+    sed -i 's/ default_server//' /etc/nginx/sites-available/default
+    cat /etc/nginx/sites-available/default > /etc/nginx/sites-available/$domain_conf
     #Moving Example.com.conf file back to /etc/nginx/sites-available/
-    mv $PWD/$domain_conf /etc/nginx/sites-available/$domain_conf
+    #mv $PWD/$domain_conf /etc/nginx/sites-available/$domain_conf
     #Creating Link for Example.com.conf in etc/nginx/sites-enabled/
     ln -s /etc/nginx/sites-available/$domain_conf /etc/nginx/sites-enabled/$domain_conf
     #Removing Default Config file
@@ -59,29 +61,29 @@ configure(){
     while [ $re -eq 0 ]
     do
         read -sp "Enter Password for Wordpress Database : " wordpress_password
-        echo -e "\n"
+        echo
         read -sp "Re-Enter Password for Wordpress Database : " wordpress_re_password
         if [ $wordpress_password == $wordpress_re_password ]
         then
-            echo "Password for $dbname will be set as entered above"
+            echo -e "\nPassword for $dbname will be set as entered above"
             re=1
         else
-            echo "Entered password do not match"
+            echo -e "\nEntered password do not match"
         fi
     done
     #Granting Privileges to that specific (wordpress) user on that database
     if mysql -uroot -p$db_password -e 'GRANT ALL ON `'$dbname'`.* TO "wordpress"@"localhost" IDENTIFIED BY "'$wordpress_password'";'
     then
         mysql -uroot -p$db_password -e 'FLUSH PRIVILEGES;'
-        echo -e "Granted Privileges\n"
+        echo -e "\nGranted Privileges\n"
     else
-        echo "Problem in granting privileges"
+        echo "Problem in granting privileges\n"
     fi
     #Downloading Latest Wordpress
-    echo -e "Downloading Wordpress"
+    echo -e "Downloading Wordpress\n"
     cd /tmp/
     wget "https://wordpress.org/latest.tar.gz"
-    echo -e "Extracting files"
+    echo -e "Extracting files\n"
     #Extracting wordpress in /tmp/
     tar xzvf latest.tar.gz
     echo "Hold on !! Almost Done\n"
@@ -120,7 +122,8 @@ re=0
 while [ $re -eq 0 ]
 do
     read -sp "Enter your MYSQL password : " db_password
-    read -sp "\nRe-Enter your MYSQL password : " re_db_password
+    echo
+    read -sp "Re-Enter your MYSQL password : " re_db_password
     if [ $db_password == $re_db_password ]
     then
         echo -e "\nPassword will be set for the DB Root"
@@ -130,6 +133,7 @@ do
     fi
 done
 #Enter Domain name for setup
+echo
 read -p "Enter your Domain Name : " domain_name
 echo "---------------CHECKING--------------";
 #Array of Items to install
@@ -173,7 +177,7 @@ then
             echo "You are not a root user"
         else
             #Installing Updates
-            if apt-get update | tee -a install.log
+            if apt-get update >>$LOG 2>>$ERROR
             then
                 echo "Updated"
             else
@@ -192,7 +196,7 @@ then
                 echo "Installing $i";
                 echo "--------------------------------"
                 echo -e "${GREEN} > > > INSTALLING $i.${NC}" >> install.log
-                if apt-get install $i -y | tee -a install.log;
+                if apt-get install $i -y >>$LOG 2>>$ERROR
                 then
                     echo -e "${GREEN}Successfully installed $i.${NC}"
                     echo "---------------------------------"
@@ -219,6 +223,6 @@ then
     fi
 else
     #No packages are to install, Configure
-    echo "No packages to install\n"
+    echo -e "\nNo packages to install"
     configure $domain_name | tee -a configure.log
 fi
