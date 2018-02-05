@@ -1,12 +1,6 @@
 #!/bin/bash
 LOG=wordpress.log
 ERROR=wordpress.err
-#Function to restart php-fpm
-php_restart(){
-    service php7.1-fpm start
-    service php7.1-fpm reload
-    service php7.1-fpm restart
-}
 #Configuration Function
 configure(){
     echo -e "\n Starting Configuring \n"
@@ -23,11 +17,11 @@ configure(){
     echo "Configuration Operations"
     sed -f sedscript default.backup > $PWD/default
     mv $PWD/default /etc/nginx/sites-available/default
-    php_restart
+    service php7.0-fpm restart
     service nginx restart
     nginx -t
     #Checking if there is already an entry for Example.com in etc/hosts
-    if cat /etc/hosts | grep "127.0.0.1 example.com www.example.com"
+    if cat /etc/hosts | grep "127.0.0.1 $domain www.$domain"
     then
         echo "Configuration Already made in /etc/hosts"
     else
@@ -108,8 +102,7 @@ configure(){
     sed -i 's/username_here/wordpress/' wp-config.php
     sed -i 's/password_here/'$wordpress_password'/' wp-config.php
     #Restarting All the services
-    php_restart
-    service nginx reload
+    service php7.0-fpm restart
     service nginx restart
     nginx -t
     echo -e "\n\n--------DONE--------\n\n"
