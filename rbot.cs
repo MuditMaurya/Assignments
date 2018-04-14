@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 class rbot{
       public static void Main() {
+          //Change the value of lenght value to change the count of agents
               int length=5;
-              Console.WriteLine("Enter the names of all the 50 Agents(Press [Enter] after entering each name).");
+              Console.WriteLine("Enter the names of all the "+ length +" Agents(Press [Enter] after entering each name).");
               string [] agents = new string[length];
               string name= string.Empty;
               for(int i=0; i<length; i++)
